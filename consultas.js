@@ -1,4 +1,5 @@
 const { Pool } = require("pg");
+const bcrypt = require('bcryptjs') 
 
 const pool = new Pool({
     host: 'localhost',
@@ -33,10 +34,19 @@ const verificarCredenciales = async (email, password) => {
 
 //Función para registrar nuevos usuarios
 const agregarUsuario = async ({email, lenguage, password, rol}) => {
-    console.log(email, lenguage, password, rol)
-    const consulta = "INSERT INTO usuarios (id, email, password, rol, lenguage) values (DEFAULT, $1, $2, $3, $4)"
-    const values = [email, password, rol, lenguage]
-    await pool.query(consulta, values)
+    try{
+        console.log(email, lenguage, password, rol)
+        
+        let passwordEncriptada = await bcrypt.hash(password, 10)
+    
+        console.log("PasswordEncriptada: ", passwordEncriptada)
+    
+        const consulta = "INSERT INTO usuarios (id, email, password, rol, lenguage) values (DEFAULT, $1, $2, $3, $4)"
+        const values = [email, passwordEncriptada, rol, lenguage]
+        await pool.query(consulta, values)
+    } catch (error){
+        console.error('Error agregando usuario:', error.message);
+    }
 }
 
 
